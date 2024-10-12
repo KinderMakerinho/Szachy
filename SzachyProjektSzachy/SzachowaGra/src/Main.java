@@ -6,7 +6,7 @@ public class Main {
 
     // Funkcja licząca do 10
     public static void liczDo10() {
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 15; i++) {
             System.out.println(i); // Wypisuje aktualną wartość i
         }
     }
