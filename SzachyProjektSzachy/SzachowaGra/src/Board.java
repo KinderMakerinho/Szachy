@@ -28,15 +28,15 @@ public class Board extends Application {
 
                 // Tworzenie etykiety na numerację w lewym dolnym rogu
                 Label label = new Label();
-                label.setStyle("-fx-font-size: 18;"); // Ustawienie rozmiaru czcionki
+                label.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: black;"); // Ustawienie rozmiaru, pogrubienia i koloru czcionki
                 StackPane.setAlignment(label, Pos.BOTTOM_LEFT); // Wyrównanie etykiety do lewego dolnego rogu
 
-                // Dodanie liter w dolnym wierszu (rząd 7 w szachownicy)
+// Dodanie liter w dolnym wierszu (rząd 7 w szachownicy)
                 if (i == 7) {
                     label.setText(String.valueOf((char) ('A' + j))); // Litery A do H
                 }
 
-                // Dodanie numerów w lewej kolumnie (kolumna 0 w szachownicy)
+// Dodanie numerów w lewej kolumnie (kolumna 0 w szachownicy)
                 if (j == 0) {
                     label.setText(String.valueOf(8 - i)); // Cyfry 1 do 8
                 }
@@ -46,12 +46,12 @@ public class Board extends Application {
                 stack.getChildren().addAll(tile, label); // Dodanie pola i etykiety razem
 
                 // Dodanie pionka na pole (przykładowo na 6,0, czyli A7)
-                if (i == 4 && j == 3) { // Dodanie pionka na pole A7
+                if (i == 6 && j == 3) { // Dodanie pionka na pole A7
                     // Poprawione pobranie obrazka pionka
                     Image pawnImage = new Image("file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png"); // Ścieżka do obrazka pionka
                     ImageView pawnImageView = new ImageView(pawnImage);
-                    pawnImageView.setFitWidth(ROZMIAR_POLA); // Ustaw rozmiar obrazka
-                    pawnImageView.setFitHeight(ROZMIAR_POLA);
+                    pawnImageView.setFitWidth(70); // Ustaw rozmiar obrazka
+                    pawnImageView.setFitHeight(70);
                     StackPane.setAlignment(pawnImageView, Pos.CENTER); // Ustawienie obrazka pionka na środku pola
                     stack.getChildren().add(pawnImageView); // Dodanie obrazka pionka do StackPane
                 }
