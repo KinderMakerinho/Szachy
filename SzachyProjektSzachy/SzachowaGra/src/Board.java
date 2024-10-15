@@ -2,9 +2,10 @@ import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -43,7 +44,19 @@ public class Board extends Application {
                 // Tworzenie kontenera dla pola i etykiety
                 StackPane stack = new StackPane();
                 stack.getChildren().addAll(tile, label); // Dodanie pola i etykiety razem
-                szachownica.add(stack, j, i); // Dodanie pola z etykietą do siatki
+
+                // Dodanie pionka na pole (przykładowo na 6,0, czyli A7)
+                if (i == 4 && j == 3) { // Dodanie pionka na pole A7
+                    // Poprawione pobranie obrazka pionka
+                    Image pawnImage = new Image("file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png"); // Ścieżka do obrazka pionka
+                    ImageView pawnImageView = new ImageView(pawnImage);
+                    pawnImageView.setFitWidth(ROZMIAR_POLA); // Ustaw rozmiar obrazka
+                    pawnImageView.setFitHeight(ROZMIAR_POLA);
+                    StackPane.setAlignment(pawnImageView, Pos.CENTER); // Ustawienie obrazka pionka na środku pola
+                    stack.getChildren().add(pawnImageView); // Dodanie obrazka pionka do StackPane
+                }
+
+                szachownica.add(stack, j, i); // Dodanie pola z etykietą i pionkiem do siatki
             }
         }
 
