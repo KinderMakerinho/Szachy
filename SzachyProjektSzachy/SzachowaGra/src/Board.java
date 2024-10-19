@@ -48,7 +48,7 @@ public class Board extends Application {
                 // Dodanie pionka na pole (przykładowo na 6,0, czyli A7)
                 if (i == 6 && j == 3) { // Dodanie pionka na pole A7
                     // Poprawione pobranie obrazka pionka
-                    Image pawnImage = new Image("file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png"); // Ścieżka do obrazka pionka
+                    Image pawnImage = new Image("file:C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png"); // Ścieżka do obrazka pionka
                     ImageView pawnImageView = new ImageView(pawnImage);
                     pawnImageView.setFitWidth(70); // Ustaw rozmiar obrazka
                     pawnImageView.setFitHeight(70);
