@@ -55,12 +55,12 @@ public class Board extends Application {
 
         // Dodanie białych pionków na linię A2-H2 (wiersz 6)
         for (int col = 0; col < 8; col++) {
-            addPawn(szachownica, 6, col, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png", false);
+            addPawn(szachownica, 6, col, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png", false);
         }
 
         // Dodanie czarnych pionków na linię A6-H6 (wiersz 1)
         for (int col = 0; col < 8; col++) {
-            addPawn(szachownica, 1, col, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnypionek.png", true);
+            addPawn(szachownica, 1, col, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnypionek.png", true);
         }
 
         Scene scene = new Scene(szachownica, SZEROKOSC_SZACHOWNICY + ROZMIAR_POLA, WYSOKOSC_SZACHOWNICY); // Ustawiamy stałą szerokość i wysokość okna

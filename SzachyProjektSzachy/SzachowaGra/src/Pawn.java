@@ -8,6 +8,7 @@ public class Pawn {
     private int currentColumn;
     private boolean isBlack;
 
+
     public Pawn(String imagePath, int row, int col, boolean isBlack) {
         this.isBlack = isBlack;
         // Wczytanie obrazu
