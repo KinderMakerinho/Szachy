@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+//male zmiany
+
 public class Board extends Application {
     private static final int ROZMIAR_POLA = 100;
     private static final int SZEROKOSC_SZACHOWNICY = ROZMIAR_POLA * 8;

@@ -5,7 +5,7 @@ public class Main {
         // Collect user data
         runGame(args);
     }
-
+ //male zmiany
     public static void runGame(String[] args) {
         Scanner scanner = new Scanner(System.in);
 

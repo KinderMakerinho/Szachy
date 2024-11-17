@@ -6,7 +6,7 @@ public class GRACZE {
     private String imie;
     private String kolor;
     private int punkty;
-
+   // male zmioany
     // Constructor
     public GRACZE(String imie, String kolor, int punkty) {
         this.imie = imie;
