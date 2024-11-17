@@ -1,3 +1,3 @@
 public class Biskupek {
-    //jem gowno
+        //CZYTODZIALA
 }
