@@ -17,6 +17,8 @@ public class Board extends Application {
     private static final int WYSOKOSC_SZACHOWNICY = ROZMIAR_POLA * 8; // 8 pól w pionie
     private Pawn selectedPawn = null;
 
+
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -24,9 +26,9 @@ public class Board extends Application {
     @Override
     public void start(Stage primaryStage) {
         GridPane szachownica = new GridPane();
-        szachownica.setPrefSize(SZEROKOSC_SZACHOWNICY, WYSOKOSC_SZACHOWNICY);  // Ustawienie stałej szerokości i wysokości szachownicy
+        szachownica.setPrefSize(SZEROKOSC_SZACHOWNICY, WYSOKOSC_SZACHOWNICY);
 
-        // Dodajemy pola szachownicy i numerację
+
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Rectangle tile = new Rectangle(ROZMIAR_POLA, ROZMIAR_POLA); // Używamy stałego rozmiaru
@@ -46,21 +48,21 @@ public class Board extends Application {
                 szachownica.add(stack, j, i); // Dodajemy na szachownicę
             }
 
-            // Dodanie numeracji wierszy
+
             Label rowLabel = new Label(String.valueOf(8 - i));
             StackPane rowStack = new StackPane(rowLabel);
             rowStack.setPrefSize(ROZMIAR_POLA, ROZMIAR_POLA);
             szachownica.add(rowStack, 0, i);
         }
 
-        // Dodanie białych pionków na linię A2-H2 (wiersz 6)
+
         for (int col = 0; col < 8; col++) {
-            addPawn(szachownica, 6, col, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png", false);
+            addPawn(szachownica, 6, col, "file:/C:/Users/paveb/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png", false);
         }
 
-        // Dodanie czarnych pionków na linię A6-H6 (wiersz 1)
+
         for (int col = 0; col < 8; col++) {
-            addPawn(szachownica, 1, col, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnypionek.png", true);
+            addPawn(szachownica, 1, col, "file:/C:/Users/paveb/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnypionek.png", true);
         }
 
         Scene scene = new Scene(szachownica, SZEROKOSC_SZACHOWNICY + ROZMIAR_POLA, WYSOKOSC_SZACHOWNICY); // Ustawiamy stałą szerokość i wysokość okna
@@ -116,13 +118,13 @@ public class Board extends Application {
     }
 
     private void executeMove(StackPane stack, int row, int column) {
-        // Usuń pionka z bieżącego pola
+
         StackPane currentStack = (StackPane) selectedPawn.getImageView().getParent();
         if (currentStack != null) {
             currentStack.getChildren().remove(selectedPawn.getImageView());
         }
 
-        // Przenieś pionka na nowe pole
+
         stack.getChildren().add(selectedPawn.getImageView());
         selectedPawn.setCurrentRow(row);
         selectedPawn.setCurrentColumn(column);
@@ -131,7 +133,7 @@ public class Board extends Application {
 
         // Ustaw flagę dla ruchu
         selectedPawn.setFirstMove(false);
-        selectedPawn = null; // Reset zaznaczenia
+        selectedPawn = null;
     }
 
     private Node getNodeFromGridPane(GridPane grid, int col, int row) {

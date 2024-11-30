@@ -7,7 +7,7 @@ public class GRACZE {
     private String kolor;
     private int punkty;
 
-    // Constructor
+
     public GRACZE(String imie, String kolor, int punkty) {
         this.imie = imie;
         this.kolor = kolor;
@@ -41,7 +41,7 @@ public class GRACZE {
 
 
     public void saveToFile() {
-        File file = new File("gracze.txt");
+        File file = new File("file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/gracze.txt");
 
         try (FileWriter writer = new FileWriter(file, true)) {
 

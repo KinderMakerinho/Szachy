@@ -11,8 +11,7 @@ public class Pawn {
 
     public Pawn(String imagePath, int row, int col, boolean isBlack) {
         this.isBlack = isBlack;
-        // Wczytanie obrazu
-        Image image = new Image(imagePath);
+        Image image = new Image("file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png");
         this.imageView = new ImageView(image);
 
         this.imageView.setFitWidth(90);
@@ -23,6 +22,7 @@ public class Pawn {
     }
 
     public ImageView getImageView() {
+
         return this.imageView;
     }
 
