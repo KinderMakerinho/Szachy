@@ -21,6 +21,8 @@ public class Board extends Application {
     private static final int SZEROKOSC_SZACHOWNICY = ROZMIAR_POLA * 8;
     private static final int WYSOKOSC_SZACHOWNICY = ROZMIAR_POLA * 8;
     private Pawn selectedPawn = null;
+    private Knight selectedKnight = null;
+
     private GRACZE gracz1;
     private GRACZE gracz2;
 
@@ -73,9 +75,13 @@ public class Board extends Application {
 
 
         for (int col = 0; col < 8; col++) {
-            addPawn(szachownica, 6, col, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/pngegg.png", false);
-            addPawn(szachownica, 1, col, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnypionek.png", true);
+            addPawn(szachownica, 6, col, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/bialypionek.png", false);
+            addPawn(szachownica, 1, col, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnypionekk.png", true);
         }
+        addKnight(szachownica, 0, 1, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnyskoczek.png", true);
+        addKnight(szachownica, 0, 6, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnyskoczek.png", true);
+        addKnight(szachownica, 7, 1, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/bialyskoczek.png", false);
+        addKnight(szachownica, 7, 6, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/bialyskoczek.png", false);
 
 
         Scene scene = new Scene(szachownica, SZEROKOSC_SZACHOWNICY + ROZMIAR_POLA, WYSOKOSC_SZACHOWNICY);
@@ -128,6 +134,20 @@ public class Board extends Application {
         }
     }
 
+    private void addKnight(GridPane board, int row, int col, String imagePath, boolean isBlack) {
+        Knight knight = new Knight(imagePath, row, col, isBlack);
+        StackPane stack = (StackPane) getNodeFromGridPane(board, col, row);
+        stack.getChildren().add(knight.getImageView());
+        knight.getImageView().setOnMouseClicked(event -> selectKnight(knight));
+    }
+    private void selectKnight(Knight knight) {
+        selectedKnight = knight; // Zapisujemy wybranego skoczka
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Wybrano skoczka");
+        alert.setHeaderText(null);
+        alert.setContentText("Skoczek został wybrany. Kliknij na pole, aby wykonać ruch.");
+        alert.showAndWait();
+    }
 
     private void executeMove(StackPane stack, int row, int column) {
         if (selectedPawn != null) {
@@ -159,7 +179,7 @@ public class Board extends Application {
             return;
         }
 
-        File gameFile = new File("C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/zapisywaniedancyhgame_positions.txt");
+        File gameFile = new File("file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/zapisywaniedancyhgame_positions.txt");
         try (FileWriter writer = new FileWriter(gameFile, true)) {
             writer.write("Pozycje pionków po grze:\n");
 
