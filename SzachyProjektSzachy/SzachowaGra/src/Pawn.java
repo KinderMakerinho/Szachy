@@ -1,3 +1,4 @@
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -7,7 +8,7 @@ public class Pawn {
     private int currentRow;
     private int currentColumn;
     private boolean isBlack;
- //male zmiany
+    //male zmiany
     public Pawn(String imagePath, int row, int col, boolean isBlack) {
         this.isBlack = isBlack;
         // Wczytanie obrazu
@@ -57,5 +58,10 @@ public class Pawn {
 
     public boolean isBlack() {
         return isBlack;
+    }
+
+    public Object getColor() {
+        return null;
+
     }
 }

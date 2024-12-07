@@ -9,12 +9,11 @@ public class Main {
     public static void runGame(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-
-        System.out.print("Podaj imię Gracza 1: ");
+        System.out.println("Podaj imię Gracza 1: ");
         String imie1 = scanner.nextLine();
-        System.out.print("Podaj kolor figury Gracza 1 (biały/czarny): ");
+        System.out.println("Podaj kolor figury Gracza 1 (biały/czarny): ");
         String kolor1 = scanner.nextLine();
-        System.out.print("Podaj punkty Gracza 1: ");
+        System.out.println("Podaj punkty Gracza 1: ");
         int punkty1 = scanner.nextInt();
         scanner.nextLine();
 
