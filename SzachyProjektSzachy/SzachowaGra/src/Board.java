@@ -14,8 +14,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-//male zmiany
-
 public class Board extends Application {
     private static final int ROZMIAR_POLA = 100;
     private static final int SZEROKOSC_SZACHOWNICY = ROZMIAR_POLA * 8;
@@ -23,30 +21,22 @@ public class Board extends Application {
     private Pawn selectedPawn = null;
     private Knight selectedKnight = null;
 
-    private GRACZE gracz1;
-    private GRACZE gracz2;
+    private static GRACZE gracz1;
+    private static GRACZE gracz2;
 
-    public static void main(String[] args) {
-
-        launch(args);
-    }
-
-
-    public static void launch(String[] args, GRACZE gracz1, GRACZE gracz2) {
-        Application.launch(Board.class, args);
+    // Metoda do ustawienia graczy
+    public static void initializePlayers(GRACZE g1, GRACZE g2) {
+        gracz1 = g1;
+        gracz2 = g2;
     }
 
     @Override
     public void start(Stage primaryStage) {
-
-        this.gracz1 = gracz1;
-        this.gracz2 = gracz2;
-
-
+        // Tworzenie szachownicy
         GridPane szachownica = new GridPane();
         szachownica.setPrefSize(SZEROKOSC_SZACHOWNICY, WYSOKOSC_SZACHOWNICY);
 
-
+        // Generowanie pól szachownicy
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Rectangle tile = new Rectangle(ROZMIAR_POLA, ROZMIAR_POLA);
@@ -66,30 +56,31 @@ public class Board extends Application {
                 szachownica.add(stack, j, i);
             }
 
-
+            // Oznaczenia wierszy
             Label rowLabel = new Label(String.valueOf(8 - i));
             StackPane rowStack = new StackPane(rowLabel);
             rowStack.setPrefSize(ROZMIAR_POLA, ROZMIAR_POLA);
             szachownica.add(rowStack, 0, i);
         }
 
-
+        // Dodanie pionków
         for (int col = 0; col < 8; col++) {
-            addPawn(szachownica, 6, col, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/bialypionek.png", false);
-            addPawn(szachownica, 1, col, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnypionekk.png", true);
+            addPawn(szachownica, 6, col, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/bialypionek.png", false);
+            addPawn(szachownica, 1, col, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnypionekk.png", true);
         }
-        addKnight(szachownica, 0, 1, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnyskoczek.png", true);
-        addKnight(szachownica, 0, 6, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnyskoczek.png", true);
-        addKnight(szachownica, 7, 1, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/bialyskoczek.png", false);
-        addKnight(szachownica, 7, 6, "file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/bialyskoczek.png", false);
 
+        // Dodanie skoczków
+        addKnight(szachownica, 3, 3, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnyskoczek.png", true);
+        addKnight(szachownica, 4, 4, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/czarnyskoczek.png", true);
+        addKnight(szachownica, 7, 1, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/bialyskoczek.png", false);
+        addKnight(szachownica, 7, 6, "file:/C:/Users/karol/Desktop/Szachy/SzachyProjektSzachy/SzachowaGra/src/Grafiki/bialyskoczek.png", false);
 
+        // Utworzenie sceny
         Scene scene = new Scene(szachownica, SZEROKOSC_SZACHOWNICY + ROZMIAR_POLA, WYSOKOSC_SZACHOWNICY);
         primaryStage.setTitle("Szachy");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-
 
     private void addPawn(GridPane board, int row, int col, String imagePath, boolean isBlack) {
         Pawn pawn = new Pawn(imagePath, row, col, isBlack);
@@ -99,7 +90,6 @@ public class Board extends Application {
         pawn.getImageView().setOnMouseClicked(event -> selectPawn(pawn));
     }
 
-
     private void selectPawn(Pawn pawn) {
         selectedPawn = pawn;
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -108,7 +98,6 @@ public class Board extends Application {
         alert.setContentText("Pionek został wybrany. Kliknij na pole, aby wykonać ruch.");
         alert.showAndWait();
     }
-
 
     private void movePawn(StackPane stack, int row, int column) {
         if (selectedPawn != null) {
@@ -140,6 +129,7 @@ public class Board extends Application {
         stack.getChildren().add(knight.getImageView());
         knight.getImageView().setOnMouseClicked(event -> selectKnight(knight));
     }
+
     private void selectKnight(Knight knight) {
         selectedKnight = knight; // Zapisujemy wybranego skoczka
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -151,38 +141,26 @@ public class Board extends Application {
 
     private void executeMove(StackPane stack, int row, int column) {
         if (selectedPawn != null) {
-
             StackPane currentStack = (StackPane) selectedPawn.getImageView().getParent();
             if (currentStack != null) {
                 currentStack.getChildren().remove(selectedPawn.getImageView());
             }
-
 
             stack.getChildren().add(selectedPawn.getImageView());
             selectedPawn.setCurrentRow(row);
             selectedPawn.setCurrentColumn(column);
             selectedPawn.setFirstMove(false);
 
-
             selectedPawn = null;
-
 
             saveGamePositionsToFile();
         }
     }
 
-
-
     private void saveGamePositionsToFile() {
-
-        if (selectedPawn == null) {
-            return;
-        }
-
-        File gameFile = new File("file:/C:/Users/paveb/Desktop/PO1 PROJEKT/Szachy/SzachyProjektSzachy/SzachowaGra/src/zapisywaniedancyhgame_positions.txt");
+        File gameFile = new File("game_positions.txt");
         try (FileWriter writer = new FileWriter(gameFile, true)) {
             writer.write("Pozycje pionków po grze:\n");
-
 
             for (Node node : ((GridPane) selectedPawn.getImageView().getParent()).getChildren()) {
                 if (node instanceof StackPane) {
@@ -200,8 +178,6 @@ public class Board extends Application {
             System.out.println("Błąd podczas zapisywania pozycji do pliku.");
         }
     }
-
-
 
     private Node getNodeFromGridPane(GridPane grid, int col, int row) {
         for (Node node : grid.getChildren()) {
