@@ -26,3 +26,16 @@ Imię: 1, Kolor: 1, Punkty: 1
 Imię: 1, Kolor: 1, Punkty: 1
 Imię: 1, Kolor: 1, Punkty: 1
 Imię: 1, Kolor: 1, Punkty: 1
+Imię: 1, Kolor: 1, Punkty: 1
+Imię: 1, Kolor: 1, Punkty: 1
+Imię: 4, Kolor: 4, Punkty: 4
+Imię: 4, Kolor: 44, Punkty: 4
+Imię: 4555, Kolor: 55, Punkty: 5
+Imię: , Kolor: 5, Punkty: 5
+Imię: 7, Kolor: 7, Punkty: 7
+Imię: , Kolor: 7, Punkty: 7
+Imię: 2, Kolor: 3, Punkty: 4
+Imię: 5, Kolor: 6, Punkty: 7
+Imię: 1, Kolor: 1, Punkty: 1
+Imię: 1, Kolor: 1, Punkty: 1
+Imię: 12, Kolor: 12, Punkty: 12
