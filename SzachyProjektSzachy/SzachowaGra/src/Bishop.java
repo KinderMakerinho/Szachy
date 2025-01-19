@@ -1,13 +1,13 @@
-public class Rook extends ChessPiece {
+public class Bishop extends ChessPiece {
     private boolean hasMoved;
-    public Rook(String imagePath, int row, int col, boolean isBlack) {
+    public Bishop(String imagePath, int row, int col, boolean isBlack) {
         super(imagePath, row, col, isBlack);
     }
 
     @Override
     public boolean isValidMove(int targetRow, int targetCol) {
-        // Wieża porusza się po wierszach lub kolumnach
-        return targetRow == getCurrentRow() || targetCol == getCurrentColumn();
+        // Goniec porusza się po przekątnych
+        return Math.abs(targetRow - getCurrentRow()) == Math.abs(targetCol - getCurrentColumn());
     }
     public boolean hasMoved() {
         return hasMoved;

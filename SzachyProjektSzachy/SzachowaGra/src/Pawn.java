@@ -1,61 +1,69 @@
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+public class Pawn extends ChessPiece {
+    private boolean hasMoved;
+    private ChessPiece[][] boardPieces; // Referencja do planszy
 
-public class Pawn {
-    private ImageView imageView;
-    private boolean firstMove = true;
-    private int currentRow;
-    private int currentColumn;
-    private boolean isBlack;
- //male zmiany
-    public Pawn(String imagePath, int row, int col, boolean isBlack) {
-        this.isBlack = isBlack;
-        // Wczytanie obrazu
-        Image image = new Image(imagePath);
-        this.imageView = new ImageView(image);
-
-        this.imageView.setFitWidth(90);
-        this.imageView.setFitHeight(90);
-
-        this.currentRow = row;
-        this.currentColumn = col;
+    // Konstruktor, który przyjmuje planszę jako parametr
+    public Pawn(String imagePath, int row, int col, boolean isBlack, ChessPiece[][] boardPieces) {
+        super(imagePath, row, col, isBlack);
+        this.boardPieces = boardPieces; // Inicjalizacja planszy
+        this.hasMoved = false;  // Pionek nie ruszył się na początku
     }
 
-    public ImageView getImageView() {
-        return this.imageView;
-    }
+    public boolean isValidMove(int targetRow, int targetCol) {
+        int direction = isBlack() ? 1 : -1; // Czarne pionki poruszają się w dół, białe w górę
+        int startRow = getCurrentRow();
+        int startCol = getCurrentColumn();
 
+        // Ruch o jedno pole do przodu
+        if (targetCol == startCol && targetRow == startRow + direction) {
+            if (isTileEmptyOrOpponentPiece(targetRow, targetCol)) {
+                return true;
+            }
+        }
 
-    public int getCurrentRow() {
-        return this.currentRow;
-    }
+        // Ruch o dwa pola do przodu tylko, jeśli pionek jeszcze się nie ruszył
+        if (!hasMoved && targetCol == startCol && targetRow == startRow + 2 * direction) {
+            if (isTileEmptyOrOpponentPiece(startRow + direction, startCol) &&
+                    isTileEmptyOrOpponentPiece(targetRow, targetCol)) {
+                return true;
+            }
+        }
 
+        // Sprawdzenie bicia na ukos (tylko w przypadku przeciwnika)
+        if (Math.abs(targetCol - startCol) == 1 && targetRow == startRow + direction) {
+            if (isOpponentPiece(targetRow, targetCol)) {
+                return true;  // Bicie na ukos, jeśli na polu znajduje się pionek przeciwnika
+            }
+        }
 
-    public int getCurrentColumn() {
-        return this.currentColumn;
-    }
-
-
-    public void setCurrentRow(int row) {
-        this.currentRow = row;
-    }
-
-
-    public void setCurrentColumn(int col) {
-        this.currentColumn = col;
+        return false; // Ruch nie jest dozwolony
     }
 
 
-    public boolean isFirstMove() {
-        return this.firstMove;
+    // Metoda sprawdzająca, czy pole jest puste lub zawiera pionka przeciwnika
+    private boolean isTileEmptyOrOpponentPiece(int row, int col) {
+        ChessPiece pieceAtTarget = boardPieces[row][col];  // Pobierz figurę na danym polu
+        if (pieceAtTarget == null) {
+            return true;  // Pole jest puste
+        } else if (pieceAtTarget.isBlack() != this.isBlack()) {
+            return true;  // Pole zawiera figurę przeciwnika
+        }
+        return false;  // Pole zawiera figurę tego samego koloru
     }
 
 
-    public void setFirstMove(boolean firstMove) {
-        this.firstMove = firstMove;
+    // Metoda sprawdzająca, czy pole jest zajęte przez pionka przeciwnika
+    public boolean isOpponentPiece(int row, int col) {
+        ChessPiece pieceAtTarget = boardPieces[row][col];
+        return pieceAtTarget != null && pieceAtTarget.isBlack() != this.isBlack();
+    }
+    // Getter i Setter dla hasMoved
+    public boolean hasMoved() {
+        return hasMoved;
     }
 
-    public boolean isBlack() {
-        return isBlack;
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
     }
+
 }
