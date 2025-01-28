@@ -387,74 +387,103 @@ public class Board extends Application {
         int srcRow = piece.getCurrentRow();
         int srcCol = piece.getCurrentColumn();
 
-        // Usunięcie figury ze starego pola w interfejsie graficznym
+        // 🛠️ Usunięcie figury ze starego pola w interfejsie graficznym
         StackPane oldTile = (StackPane) getNodeFromGridPane(szachownica, srcCol, srcRow);
         if (oldTile != null) {
             oldTile.getChildren().clear(); // Usunięcie figury ze starego pola
 
             // Przywrócenie odpowiedniego koloru pola
             Rectangle newTile = new Rectangle(ROZMIAR_POLA, ROZMIAR_POLA);
-            if ((srcRow + srcCol) % 2 == 0) {
-                newTile.setFill(Color.WHITE);
-            } else {
-                newTile.setFill(Color.BROWN);
-            }
+            newTile.setFill((srcRow + srcCol) % 2 == 0 ? Color.WHITE : Color.BROWN);
             oldTile.getChildren().add(newTile); // Dodajemy nowy kafelek jako tło
         } else {
             System.err.println("❌ Nie znaleziono starego pola dla figury: (" + srcRow + ", " + srcCol + ").");
         }
 
-        // Obsługa ruchów (np. dla pionków, wież, gońców itd.)
+        // 🧩 Logika ruchu dla różnych figur
         if (piece instanceof Pawn) {
             Pawn selectedPawn = (Pawn) piece;
             if (isValidPawnMove(selectedPawn, row, col) && isPathClearForPawn(selectedPawn, row, col)) {
+                // Obsługa bicia przeciwnika
+                if (!isTileEmpty(row, col) && getPiece(row, col).isBlack() != selectedPawn.isBlack()) {
+                    ChessPiece opponentPiece = getPiece(row, col);
+                    removePiece(opponentPiece);
+                }
                 moveSuccessful = true;
                 selectedPawn.setHasMoved(true);
             }
         } else if (piece instanceof Knight) {
             Knight selectedKnight = (Knight) piece;
-            if (selectedKnight.isValidMove(row, col) && isTileEmptyOrOpponentPiece(row, col, selectedKnight.isBlack())) {
+            if (selectedKnight.isValidMove(row, col)) {
+                // Obsługa bicia przeciwnika
+                if (!isTileEmpty(row, col) && getPiece(row, col).isBlack() != selectedKnight.isBlack()) {
+                    ChessPiece opponentPiece = getPiece(row, col);
+                    removePiece(opponentPiece);
+                }
                 moveSuccessful = true;
             }
         } else if (piece instanceof Bishop) {
             Bishop selectedBishop = (Bishop) piece;
             if (selectedBishop.isValidMove(row, col) && isPathClear(selectedBishop, row, col)) {
+                // Obsługa bicia przeciwnika
+                if (!isTileEmpty(row, col) && getPiece(row, col).isBlack() != selectedBishop.isBlack()) {
+                    ChessPiece opponentPiece = getPiece(row, col);
+                    removePiece(opponentPiece);
+                }
                 moveSuccessful = true;
             }
         } else if (piece instanceof Rook) {
             Rook selectedRook = (Rook) piece;
             if (selectedRook.isValidMove(row, col) && isPathClear(selectedRook, row, col)) {
+                // Obsługa bicia przeciwnika
+                if (!isTileEmpty(row, col) && getPiece(row, col).isBlack() != selectedRook.isBlack()) {
+                    ChessPiece opponentPiece = getPiece(row, col);
+                    removePiece(opponentPiece);
+                }
                 moveSuccessful = true;
             }
         } else if (piece instanceof Queen) {
             Queen selectedQueen = (Queen) piece;
             if (selectedQueen.isValidMove(row, col) && isPathClear(selectedQueen, row, col)) {
+                // Obsługa bicia przeciwnika
+                if (!isTileEmpty(row, col) && getPiece(row, col).isBlack() != selectedQueen.isBlack()) {
+                    ChessPiece opponentPiece = getPiece(row, col);
+                    removePiece(opponentPiece);
+                }
                 moveSuccessful = true;
             }
         } else if (piece instanceof King) {
             King selectedKing = (King) piece;
             if (selectedKing.isValidMove(row, col)) {
+                // Obsługa bicia przeciwnika
+                if (!isTileEmpty(row, col) && getPiece(row, col).isBlack() != selectedKing.isBlack()) {
+                    ChessPiece opponentPiece = getPiece(row, col);
+                    removePiece(opponentPiece);
+                }
                 moveSuccessful = true;
             }
         }
 
+        // ✅ Jeśli ruch jest poprawny
         if (moveSuccessful) {
-            // Przenieś figurę na docelowe pole
+            // 🔄 Aktualizuj pozycję figury na docelowym polu
             updatePiecePosition(piece, targetTile, row, col);
 
-            // Powiadom serwer o ruchu
-            notifyServerAboutMove(srcRow, srcCol, row, col);
-
-            // Aktualizacja `boardPieces`
+            // 🛠️ Aktualizacja `boardPieces` dla poprawności planszy
             updateBoardPieces(piece, srcRow, srcCol, row, col);
 
-            // Zmiana tury
+            // 🌐 Powiadom serwer o wykonanym ruchu
+            notifyServerAboutMove(srcRow, srcCol, row, col);
+
+            // 🔄 Zmień turę
             isWhiteTurn = !isWhiteTurn;
             System.out.println("🔄 Teraz tura " + (isWhiteTurn ? "białych" : "czarnych"));
         } else {
             System.out.println("❌ Ruch niemożliwy! Spróbuj ponownie.");
         }
     }
+
+
 
 
 

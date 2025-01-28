@@ -161,29 +161,30 @@ public class Main extends Application {
         }
 
         try {
+            // Rozdziel komunikat na części
             String[] parts = message.split(":");
             if (parts.length != 3) {
-                System.err.println("Nieprawidłowy format wiadomości ruchu: " + message);
+                System.err.println("❌ Nieprawidłowy format wiadomości ruchu: " + message);
                 return;
             }
 
             String color = parts[1]; // "WHITE" lub "BLACK"
-            String moveDetails = parts[2]; // np. "6,4->4,4"
+            String moveDetails = parts[2]; // "2,3->3,3"
 
-            // Jeśli ruch pochodzi od przeciwnika
+            // Jeśli ruch dotyczy przeciwnika, wykonaj go lokalnie
             if (!color.equals(chessClient.getPlayerColor())) {
                 System.out.println("Wykonuję ruch przeciwnika: " + moveDetails);
-                board.executeMove("MOVE:" + color + ":" + moveDetails);
+                board.executeMove(message); // Przetwarzanie lokalne
             } else {
-                // Jeśli ruch pochodzi od tego samego gracza, ignorujemy
                 System.out.println("Zignorowano własny ruch: " + moveDetails);
             }
 
         } catch (Exception e) {
-            System.err.println("Błąd przetwarzania ruchu: " + message);
+            System.err.println("❌ Błąd przetwarzania ruchu: " + message);
             e.printStackTrace();
         }
     }
+
 
 
 

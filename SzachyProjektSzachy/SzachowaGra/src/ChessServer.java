@@ -172,17 +172,21 @@ public class ChessServer {
                     return;
                 }
 
-                // Rozgłoszenie ruchu
+                // Rozgłoszenie ruchu do obu klientów
                 String color = isWhiteTurn ? "WHITE" : "BLACK";
                 broadcast("MOVE:" + color + ":" + movePart);
                 System.out.println("✅ Ruch zaakceptowany: " + playerName + " wykonał ruch: " + movePart);
 
                 // Zmiana tury
                 isWhiteTurn = !isWhiteTurn;
+
+                // Wysłanie informacji o turze tylko do gracza, który ma teraz turę
+                String nextTurnPlayer = isWhiteTurn ? whitePlayer : blackPlayer;
+                sendToPlayer(nextTurnPlayer, "TURN:" + (isWhiteTurn ? "WHITE" : "BLACK"));
                 System.out.println("🔄 Tura zmieniona na: " + (isWhiteTurn ? "WHITE" : "BLACK"));
-                broadcast("TURN:" + (isWhiteTurn ? "WHITE" : "BLACK"));
             }
         }
+
 
 
 
