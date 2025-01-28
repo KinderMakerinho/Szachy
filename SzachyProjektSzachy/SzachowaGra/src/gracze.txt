@@ -1,0 +1,5 @@
+Imię: 133, Kolor: Nie wybrany, Punkty: 0
+Imię: 123, Kolor: Nie wybrany, Punkty: 0
+Imię: 421, Kolor: Nie wybrany, Punkty: 0
+Imię: Tomeczek, Kolor: Nie wybrany, Punkty: 0
+Imię: tOMEK, Kolor: Nie wybrany, Punkty: 0

@@ -1,92 +1,111 @@
+// ChessServer.java
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 public class ChessServer {
-    private static final int PORT = 12345;  // Port serwera
-    private static ServerSocket serverSocket;
+    private static final int PORT = 12345;
+    private static Map<String, PrintWriter> clients = new HashMap<>();
+    private static String whitePlayer = null;
+    private static String blackPlayer = null;
 
     public static void main(String[] args) {
-        try {
-            serverSocket = new ServerSocket(PORT);
-            System.out.println("Serwer uruchomiony na porcie " + PORT);
-
-            // Czekamy na połączenia dwóch graczy
-            Socket player1Socket = serverSocket.accept();
-            System.out.println("Gracz 1 połączony.");
-            Socket player2Socket = serverSocket.accept();
-            System.out.println("Gracz 2 połączony.");
-
-            // Tworzymy wątki do obsługi każdego gracza
-            new Thread(new ClientHandler(player1Socket, true)).start();  // Gracz 1 (Biały)
-            new Thread(new ClientHandler(player2Socket, false)).start(); // Gracz 2 (Czarny)
-
+        System.out.println("Serwer szachowy uruchomiony...");
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            while (true) {
+                new ClientHandler(serverSocket.accept()).start();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Klasa do obsługi komunikacji z każdym graczem
-    static class ClientHandler implements Runnable {
-        private Socket clientSocket;
-        private boolean isWhitePlayer;  // Zmienna wskazująca, czy to gracz biały
-        private PrintWriter out;
-        private BufferedReader in;
+    private static synchronized void broadcast(String message) {
+        for (PrintWriter out : clients.values()) {
+            out.println(message);
+        }
+    }
 
-        public ClientHandler(Socket socket, boolean isWhitePlayer) {
-            this.clientSocket = socket;
-            this.isWhitePlayer = isWhitePlayer;
+    private static class ClientHandler extends Thread {
+        private Socket socket;
+        private String playerName;
+        private PrintWriter out;
+
+        public ClientHandler(Socket socket) {
+            this.socket = socket;
         }
 
         @Override
         public void run() {
-            try {
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+                out = new PrintWriter(socket.getOutputStream(), true);
 
-                // Powitanie gracza
-                out.println("Połączono z serwerem. Jesteś " + (isWhitePlayer ? "Białym" : "Czarnym") + " graczem.");
+                out.println("Wprowadź swoje imię:");
+                playerName = in.readLine();
 
-                // Oczekiwanie na wybór koloru od graczy
-                String colorChoice = in.readLine();  // Oczekiwanie na wybór koloru
-                System.out.println("Gracz wybrał: " + colorChoice);
-
-                // Jeśli gracz wybrał Białego, informujemy drugiego gracza
-                if (colorChoice.equals("Biały")) {
-                    out.println("Gracz Biały jest gotowy. Czekamy na gracza Czarnego...");
-                } else if (colorChoice.equals("Czarny")) {
-                    out.println("Gracz Czarny jest gotowy. Czekamy na gracza Białego...");
-                }
-
-                // Połączenie graczy: informowanie drugiego gracza o połączeniu pierwszego
-                if (isWhitePlayer) {
-                    // Czekamy na połączenie drugiego gracza (Czarnego)
-                    Socket secondPlayerSocket = serverSocket.accept();
-                    new Thread(new ClientHandler(secondPlayerSocket, false)).start(); // Drugi gracz
-                    out.println("Gracz 2 połączony. Rozpoczynamy grę!");
-                } else {
-                    // Czekaj na wiadomość od drugiego gracza (Czarnego)
-                    String opponentMessage = in.readLine();
-                    System.out.println(opponentMessage);
-                    out.println("Gracz 1 połączony. Rozpoczynamy grę!");
-                }
-
-                // Główna pętla gry
-                String move;
-                while ((move = in.readLine()) != null) {
-                    System.out.println("Odebrano ruch: " + move + " od gracza " + (isWhitePlayer ? "Białego" : "Czarnego"));
-
-                    // Przekaż ruch do drugiego klienta
-                    if (isWhitePlayer) {
-                        out.println("Ruch Białego: " + move);  // Przesyłaj ruch białych do czarnego gracza
-                    } else {
-                        out.println("Ruch Czarnego: " + move);  // Przesyłaj ruch czarnych do białego gracza
+                synchronized (clients) {
+                    if (clients.containsKey(playerName)) {
+                        out.println("Imię już zajęte. Rozłączanie...");
+                        return;
                     }
+                    clients.put(playerName, out);
+                }
+
+                System.out.println(playerName + " dołączył do gry.");
+                broadcast("LOBBY_STATE:BIAŁY=" + (whitePlayer == null ? "Brak" : whitePlayer) + ",CZARNY=" + (blackPlayer == null ? "Brak" : blackPlayer));
+
+                String message;
+                while ((message = in.readLine()) != null) {
+                    System.out.println("Odebrano od " + playerName + ": " + message);
+
+                    if (message.startsWith("WHITE:")) {
+                        synchronized (clients) {
+                            if (whitePlayer == null) {
+                                whitePlayer = playerName;
+                                broadcast("LOBBY_STATE:BIAŁY=" + playerName + ",CZARNY=" + (blackPlayer == null ? "Brak" : blackPlayer));
+                            } else {
+                                out.println("Kolor BIAŁY jest już zajęty.");
+                            }
+                        }
+                    } else if (message.startsWith("BLACK:")) {
+                        synchronized (clients) {
+                            if (blackPlayer == null) {
+                                blackPlayer = playerName;
+                                broadcast("LOBBY_STATE:BIAŁY=" + (whitePlayer == null ? "Brak" : whitePlayer) + ",CZARNY=" + playerName);
+                            } else {
+                                out.println("Kolor CZARNY jest już zajęty.");
+                            }
+                        }
+                    } else if (message.equals("START_GAME")) {
+                        synchronized (clients) {
+                            if (whitePlayer != null && blackPlayer != null) {
+                                broadcast("START_GAME");
+                            } else {
+                                out.println("Nie można rozpocząć gry – obaj gracze muszą wybrać kolory.");
+                            }
+                        }
+                    }
+                    if (message.startsWith("MOVE:")) {
+                        synchronized (clients) {
+                            broadcast(message); // Przekaż ruch do wszystkich klientów
+                        }
+                    }
+
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
+                synchronized (clients) {
+                    clients.remove(playerName);
+                    if (playerName.equals(whitePlayer)) {
+                        whitePlayer = null;
+                    } else if (playerName.equals(blackPlayer)) {
+                        blackPlayer = null;
+                    }
+                    broadcast("LOBBY_STATE:BIAŁY=" + (whitePlayer == null ? "Brak" : whitePlayer) + ",CZARNY=" + (blackPlayer == null ? "Brak" : blackPlayer));
+                }
                 try {
-                    clientSocket.close();
+                    socket.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

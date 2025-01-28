@@ -1,10 +1,8 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -17,22 +15,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
 public class Main extends Application {
 
     private static List<GRACZE> gracze = new ArrayList<>();
-    private GRACZE whitePlayer = null;
-    private GRACZE blackPlayer = null;
+    private ChessClient chessClient;
+
+    private Label whiteLabel;
+    private Label blackLabel;
+    private TextArea lobbyMessages;
+    private Button startGameButton;
+    private Board board;
+    private boolean isGameStarted = false; // Flaga, aby gra uruchomiła się tylko raz na klienta
 
     public static void main(String[] args) {
-        // Uruchamiamy serwer w osobnym wątku
-        new Thread(() -> {
-            ChessServer.main(new String[]{}); // Uruchomienie serwera w osobnym wątku
-        }).start();
-        launch(args); // Uruchomienie aplikacji GUI
+        launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
+        chessClient = new ChessClient();
+        chessClient.connectToServer("localhost", this::handleServerMessage);
+
+        // Menu główne
         Text title = new Text("Szachy");
         title.setFont(Font.font("Arial", 50));
         title.setFill(Color.YELLOW);
@@ -82,31 +87,26 @@ public class Main extends Application {
     }
 
     private void showLobby(Stage primaryStage, String selectedPlayer) {
-        Label whiteLabel = new Label("Kolor Biały: Brak");
+        whiteLabel = new Label("Kolor Biały: Brak");
         whiteLabel.setTextFill(Color.WHITE);
-        Button joinWhiteButton = createStyledButton("Dołącz jako Biały");
-        joinWhiteButton.setOnAction(event -> {
-            whitePlayer = gracze.stream().filter(p -> p.getImie().equals(selectedPlayer)).findFirst().orElse(null);
-            whiteLabel.setText("Kolor Biały: " + whitePlayer.getImie());
-            joinWhiteButton.setDisable(true);
-        });
 
-        Label blackLabel = new Label("Kolor Czarny: Brak");
+        blackLabel = new Label("Kolor Czarny: Brak");
         blackLabel.setTextFill(Color.WHITE);
-        Button joinBlackButton = createStyledButton("Dołącz jako Czarny");
-        joinBlackButton.setOnAction(event -> {
-            blackPlayer = gracze.stream().filter(p -> p.getImie().equals(selectedPlayer)).findFirst().orElse(null);
-            blackLabel.setText("Kolor Czarny: " + blackPlayer.getImie());
-            joinBlackButton.setDisable(true);
-        });
 
-        Button startGameButton = createStyledButton("Rozpocznij Grę");
-        startGameButton.setOnAction(event -> {
-            if (whitePlayer != null && blackPlayer != null) {
-                new Board().start(new Stage());
-                primaryStage.close();
-            }
-        });
+        lobbyMessages = new TextArea();
+        lobbyMessages.setEditable(false);
+        lobbyMessages.setPrefHeight(200);
+
+        Button joinWhiteButton = createStyledButton("Dołącz jako Biały");
+        Button joinBlackButton = createStyledButton("Dołącz jako Czarny");
+        startGameButton = createStyledButton("Rozpocznij Grę");
+        startGameButton.setDisable(true);
+
+        joinWhiteButton.setOnAction(event -> chessClient.sendToServer("WHITE:" + selectedPlayer));
+
+        joinBlackButton.setOnAction(event -> chessClient.sendToServer("BLACK:" + selectedPlayer));
+
+        startGameButton.setOnAction(event -> chessClient.sendToServer("START_GAME"));
 
         VBox whiteBox = new VBox(10, whiteLabel, joinWhiteButton);
         whiteBox.setAlignment(Pos.CENTER);
@@ -114,15 +114,60 @@ public class Main extends Application {
         VBox blackBox = new VBox(10, blackLabel, joinBlackButton);
         blackBox.setAlignment(Pos.CENTER);
 
-        VBox startBox = new VBox(10, startGameButton);
-        startBox.setAlignment(Pos.CENTER);
+        VBox centerBox = new VBox(10, startGameButton, lobbyMessages);
+        centerBox.setAlignment(Pos.CENTER);
 
-        HBox lobbyLayout = new HBox(50, whiteBox, startBox, blackBox);
-        lobbyLayout.setAlignment(Pos.CENTER);
-        lobbyLayout.setStyle("-fx-background-color: black;");
+        HBox layout = new HBox(50, whiteBox, centerBox, blackBox);
+        layout.setAlignment(Pos.CENTER);
+        layout.setStyle("-fx-background-color: black;");
 
-        Scene lobbyScene = new Scene(lobbyLayout, 600, 400);
+        Scene lobbyScene = new Scene(layout, 700, 400);
         primaryStage.setScene(lobbyScene);
+    }
+
+    private void handleServerMessage(String message) {
+        Platform.runLater(() -> {
+            if (message.startsWith("LOBBY_STATE:")) {
+                String[] parts = message.substring("LOBBY_STATE:".length()).split(",");
+                boolean whiteAssigned = false;
+                boolean blackAssigned = false;
+
+                for (String part : parts) {
+                    if (part.startsWith("BIAŁY=")) {
+                        String whitePlayerName = part.split("=")[1].trim();
+                        whiteLabel.setText("Kolor Biały: " + (whitePlayerName.equals("Brak") ? "Brak" : whitePlayerName));
+                        whiteAssigned = !whitePlayerName.equals("Brak");
+                    } else if (part.startsWith("CZARNY=")) {
+                        String blackPlayerName = part.split("=")[1].trim();
+                        blackLabel.setText("Kolor Czarny: " + (blackPlayerName.equals("Brak") ? "Brak" : blackPlayerName));
+                        blackAssigned = !blackPlayerName.equals("Brak");
+                    }
+                }
+
+                // Aktywacja przycisku, jeśli obaj gracze są przypisani
+                startGameButton.setDisable(!(whiteAssigned && blackAssigned));
+            } else if (message.equals("START_GAME") && !isGameStarted) {
+                isGameStarted = true; // Ustawienie flagi, aby gra była uruchomiona tylko raz
+                startChessBoard();
+            } else if (message.startsWith("MOVE:")) {
+                if (board != null) {
+                    board.executeMove(message.substring(5)); // Przekazujemy ruch do szachownicy
+                }
+            } else {
+                lobbyMessages.appendText(message + "\n");
+            }
+        });
+    }
+
+    private void startChessBoard() {
+        Platform.runLater(() -> {
+            try {
+                board = new Board(chessClient);
+                board.start(new Stage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void openAddPlayerWindow() {
@@ -141,9 +186,9 @@ public class Main extends Application {
             }
         });
 
-        VBox formLayout = new VBox(10, nameField, saveButton);
-        formLayout.setAlignment(Pos.CENTER);
-        Scene scene = new Scene(formLayout, 300, 200);
+        VBox layout = new VBox(10, nameField, saveButton);
+        layout.setAlignment(Pos.CENTER);
+        Scene scene = new Scene(layout, 300, 200);
         addPlayerStage.setScene(scene);
         addPlayerStage.show();
     }

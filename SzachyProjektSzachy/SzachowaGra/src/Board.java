@@ -36,6 +36,12 @@ public class Board extends Application {
     private int numerRuchu = 1;
 
     // Fałsz oznacza ruch białych, prawda oznacza ruch czarnych
+    private ChessClient chessClient;
+
+    public Board(ChessClient chessClient) {
+        this.chessClient = chessClient;
+    }
+
 
     private static GRACZE gracz1;
     private static GRACZE gracz2;
@@ -268,11 +274,39 @@ public class Board extends Application {
         // Po kliknięciu ok, pozwalamy graczowi wykonać ruch
         alert.showAndWait();
     }
+    private void notifyServerAboutMove(int srcRow, int srcCol, int destRow, int destCol) {
+        if (chessClient != null) {
+            String move = srcRow + "," + srcCol + "->" + destRow + "," + destCol;
+            chessClient.sendToServer("MOVE:" + move);
+        }
+    }
+    public void executeMove(String move) {
+        // Rozdzielenie współrzędnych z wiadomości
+        String[] parts = move.split("->");
+        String[] src = parts[0].split(",");
+        String[] dest = parts[1].split(",");
+
+        int srcRow = Integer.parseInt(src[0]);
+        int srcCol = Integer.parseInt(src[1]);
+        int destRow = Integer.parseInt(dest[0]);
+        int destCol = Integer.parseInt(dest[1]);
+
+        // Pobranie figury z planszy
+        ChessPiece piece = boardPieces[srcRow][srcCol];
+        if (piece != null) {
+            // Wykonanie ruchu na szachownicy
+            movePiece((StackPane) getNodeFromGridPane(szachownica, srcCol, srcRow), destRow, destCol);
+        } else {
+            System.out.println("Nie znaleziono figury na pozycji: " + srcRow + "," + srcCol);
+        }
+    }
+
+
     private Node getNodeFromGridPane(GridPane grid, int col, int row) {
         for (Node node : grid.getChildren()) {
-            int columnIndex = GridPane.getColumnIndex(node);
-            int rowIndex = GridPane.getRowIndex(node);
-            if (columnIndex == col && rowIndex == row) {
+            Integer columnIndex = GridPane.getColumnIndex(node);
+            Integer rowIndex = GridPane.getRowIndex(node);
+            if (columnIndex != null && rowIndex != null && columnIndex == col && rowIndex == row) {
                 return node;
             }
         }
@@ -289,7 +323,9 @@ public class Board extends Application {
             System.out.println("To nie Twoja tura! Wybierz czarną figurę.");
             return; // Jeżeli to nie tura czarnych, kończymy metodę
         }
+
         boolean moveSuccessful = false;
+
         // Obsługuje ruch pionka
         if (selectedPawn != null) {
             if (isValidPawnMove(selectedPawn, row, col) && isPathClearForPawn(selectedPawn, row, col)) {
@@ -359,7 +395,6 @@ public class Board extends Application {
         }
 
         if (moveSuccessful) {
-
             // Sprawdzamy, czy król jest w szachu po wykonaniu ruchu
             if (isKingInCheck(isWhiteTurn)) {
                 System.out.println("Twój ruch zostawił króla w szachu! Cofnięto ruch.");
@@ -372,6 +407,11 @@ public class Board extends Application {
                 return;
             }
 
+            // Powiadom serwer o ruchu
+            if (selectedPiece != null) {
+                notifyServerAboutMove(selectedPiece.getCurrentRow(), selectedPiece.getCurrentColumn(), row, col);
+            }
+
             // Po wykonaniu ruchu zmieniamy turę
             isWhiteTurn = !isWhiteTurn;
             System.out.println("Teraz tura " + (isWhiteTurn ? "białych" : "czarnych"));
@@ -382,6 +422,8 @@ public class Board extends Application {
             System.out.println("Ruch niemożliwy! Spróbuj ponownie.");
         }
     }
+
+
 
     private boolean isKingInCheck(boolean isWhiteKing) {
         int kingRow = -1, kingCol = -1;
@@ -487,48 +529,24 @@ public class Board extends Application {
     }
 
     private void updatePiecePosition(ChessPiece piece, StackPane targetTile, int row, int col) {
-        // Zaktualizowanie tablicy boardPieces
-        boardPieces[piece.getCurrentRow()][piece.getCurrentColumn()] = null;  // Wyczyść starą pozycję
-        boardPieces[row][col] = piece;  // Ustaw nową pozycję w tablicy
-
-        // Sprawdzamy, czy kafelek już ma ImageView przed dodaniem
+        // Usuń figurę z poprzedniego kafelka
         StackPane oldTile = (StackPane) getNodeFromGridPane(szachownica, piece.getCurrentColumn(), piece.getCurrentRow());
         if (oldTile != null) {
-            System.out.println("Zawartość kafelka przed dodaniem figury: " + piece.getClass().getSimpleName());
-            for (Node node : oldTile.getChildren()) {
-                System.out.println(" - " + node.getClass().getSimpleName());
-            }
+            oldTile.getChildren().remove(piece.getImageView());
         }
 
-        // Usuń figurę z poprzedniej pozycji na planszy
-        oldTile = (StackPane) getNodeFromGridPane(szachownica, piece.getCurrentColumn(), piece.getCurrentRow());
-        if (oldTile != null) {
-            oldTile.getChildren().remove(piece.getImageView());  // Usuwamy z poprzedniego kafelka
+        // Zaktualizuj tablicę boardPieces
+        boardPieces[piece.getCurrentRow()][piece.getCurrentColumn()] = null;
+        boardPieces[row][col] = piece;
 
-            // Zapisanie usunięcia do pliku
-            String figura = piece.getClass().getSimpleName();
-            String usunietoRuch = String.format("Usunięto %s z %d,%d", figura, piece.getCurrentRow(), piece.getCurrentColumn());
-            zapiszRuchDoPliku(usunietoRuch);
+        // Przenieś grafikę na nowy kafelek
+        targetTile.getChildren().add(piece.getImageView());
 
-            System.out.println(usunietoRuch);
-        }
-
-// Zaktualizuj pozycję figury na nowym kafelku
+        // Zaktualizuj pozycję figury
         piece.setCurrentRow(row);
         piece.setCurrentColumn(col);
-
-// Dodaj obrazek figury do nowego kafelka (jeśli jeszcze go tam nie ma)
-        if (!targetTile.getChildren().contains(piece.getImageView())) {
-            targetTile.getChildren().add(piece.getImageView());
-
-            // Zapisanie dodania do pliku
-            String figura = piece.getClass().getSimpleName();
-            String dodanoRuch = String.format("Dodano %s na %d,%d", figura, row, col);
-            zapiszRuchDoPliku(dodanoRuch);
-
-            System.out.println(dodanoRuch);
-        }
     }
+
 
     private boolean isPathClearForPawn(Pawn pawn, int targetRow, int targetCol) {
         int currentRow = pawn.getCurrentRow();
@@ -586,35 +604,23 @@ public class Board extends Application {
         return false;
     }
     private void removePiece(ChessPiece piece) {
-        // Sprawdzenie, czy figura w ogóle istnieje na planszy
         if (piece == null) {
-            return;
+            return; // Jeśli nie ma figury, nic nie usuwamy
         }
 
         System.out.println("Usuwanie figury: " + piece.getClass().getSimpleName() +
                 " z pozycji: " + piece.getCurrentRow() + ", " + piece.getCurrentColumn());
 
-        // Sprawdź, czy figura ma swój obrazek w GUI
-        StackPane oldTile = (StackPane) getNodeFromGridPane(szachownica, piece.getCurrentColumn(), piece.getCurrentRow());
-
-        // Jeśli figura istnieje na planszy, usuń obrazek
-        if (oldTile != null) {
-            if (piece.getImageView() != null) {
-                oldTile.getChildren().remove(piece.getImageView());  // Usuwamy obrazek figury z planszy
-            }
+        // Usuń grafikę figury z kafelka
+        StackPane tile = (StackPane) getNodeFromGridPane(szachownica, piece.getCurrentColumn(), piece.getCurrentRow());
+        if (tile != null && piece.getImageView() != null) {
+            tile.getChildren().remove(piece.getImageView());
         }
 
-        // Upewnij się, że pole na planszy zostaje wyczyszczone
-        if (piece.getCurrentRow() >= 0 && piece.getCurrentRow() < boardPieces.length &&
-                piece.getCurrentColumn() >= 0 && piece.getCurrentColumn() < boardPieces[0].length) {
-            boardPieces[piece.getCurrentRow()][piece.getCurrentColumn()] = null;
-        }
-
-        // W przypadku pionka ustaw flagę, że nie ruszył się
-        piece.setHasMoved(false);
-
-        // (Opcjonalnie) Jeśli masz mechanizm resetowania pozycji figury, to tutaj można by zresetować np. status
+        // Usuń figurę z tablicy boardPieces
+        boardPieces[piece.getCurrentRow()][piece.getCurrentColumn()] = null;
     }
+
 
     private ChessPiece getPiece(int row, int col) {
         // Return the piece from the boardPieces array
