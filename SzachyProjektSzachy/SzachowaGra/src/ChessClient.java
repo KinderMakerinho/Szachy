@@ -7,8 +7,11 @@ public class ChessClient {
     private PrintWriter out;
     private BufferedReader in;
 
-    private Consumer<String> messageHandler;
+    private Consumer<String> messageHandler; // Funkcja obsługi wiadomości z serwera
+    private String playerName;  // Nazwa gracza, np. "Tomeczek" lub "tOMEK"
+    private String playerColor; // Kolor gracza: "WHITE" lub "BLACK"
 
+    // Połączenie z serwerem
     public void connectToServer(String serverAddress, Consumer<String> messageHandler) {
         try {
             this.messageHandler = messageHandler; // Przechowaj referencję do handlera wiadomości
@@ -18,22 +21,26 @@ public class ChessClient {
 
             System.out.println("Połączono z serwerem!");
 
+            // Nasłuchiwanie wiadomości od serwera w osobnym wątku
             new Thread(() -> {
                 String message;
                 try {
                     while ((message = in.readLine()) != null) {
                         System.out.println("Otrzymano od serwera: " + message);
-                        messageHandler.accept(message); // Przekaż wiadomość do handlera
+                        messageHandler.accept(message); // Przekaż wiadomość do handlera w klasie Main
                     }
                 } catch (IOException e) {
+                    System.out.println("Rozłączono z serwerem.");
                     e.printStackTrace();
                 }
             }).start();
         } catch (IOException e) {
+            System.out.println("Nie udało się połączyć z serwerem.");
             e.printStackTrace();
         }
     }
 
+    // Wysyłanie wiadomości do serwera
     public void sendToServer(String message) {
         if (out != null) {
             System.out.println("Wysyłanie do serwera: " + message);
@@ -41,6 +48,9 @@ public class ChessClient {
         }
     }
 
+
+
+    // Rozłączanie klienta
     public void disconnect() {
         try {
             if (socket != null) {
@@ -49,5 +59,26 @@ public class ChessClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // Ustawienie nazwy gracza
+    public void setPlayerName(String name) {
+        // Tutaj można usunąć ewentualny dopisek ", Kolor" jeśli występuje w pliku gracze.txt
+        name = name.replace(", Kolor", "").trim();
+        this.playerName = name;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    // Ustawienie koloru gracza
+    public void setPlayerColor(String color) {
+        this.playerColor = color;
+        System.out.println("Ustawiono kolor gracza na: " + color);
+    }
+
+    public String getPlayerColor() {
+        return playerColor;
     }
 }
