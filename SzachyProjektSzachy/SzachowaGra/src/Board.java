@@ -40,6 +40,7 @@ public class Board extends Application {
     private int numerRuchu = 1;
     private String playerColor; // Kolor gracza: "WHITE" lub "BLACK"
 
+    private boolean isProcessingServerMove = false;
 
     // Fałsz oznacza ruch białych, prawda oznacza ruch czarnych
     private ChessClient chessClient;
@@ -53,9 +54,6 @@ public class Board extends Application {
             System.err.println("Kolor gracza nie został ustawiony! Gra może działać niepoprawnie.");
         }
     }
-
-
-
 
     private static GRACZE gracz1;
     private static GRACZE gracz2;
@@ -90,7 +88,7 @@ public class Board extends Application {
 
                 // Obsługa kliknięcia na kafelek
                 stack.setOnMouseClicked(event -> {
-                    // Pobierz figurę z tablicy `boardPieces`
+                    // Pobierz figurę z tablicy boardPieces
                     ChessPiece piece = boardPieces[finalI][finalJ];
 
                     if (selectedPiece == null) {
@@ -313,12 +311,13 @@ public class Board extends Application {
         alert.showAndWait();
     }
     private void notifyServerAboutMove(int srcRow, int srcCol, int destRow, int destCol) {
-        if (chessClient != null) {
-            // Wysyłamy TYLKO koordynaty, np. "MOVE:2,3->3,3"
+        if (chessClient != null && !isProcessingServerMove) { // Upewniamy się, że ruch nie pochodzi od serwera
             String move = srcRow + "," + srcCol + "->" + destRow + "," + destCol;
             chessClient.sendToServer("MOVE:" + move);
+            System.out.println("📤 Powiadomiono serwer o ruchu: " + move);
         }
     }
+
     public void executeMove(String moveMessage) {
         try {
             String[] parts = moveMessage.split(":");
@@ -469,7 +468,7 @@ public class Board extends Application {
             // 🔄 Aktualizuj pozycję figury na docelowym polu
             updatePiecePosition(piece, targetTile, row, col);
 
-            // 🛠️ Aktualizacja `boardPieces` dla poprawności planszy
+            // 🛠️ Aktualizacja boardPieces dla poprawności planszy
             updateBoardPieces(piece, srcRow, srcCol, row, col);
 
             // 🌐 Powiadom serwer o wykonanym ruchu
@@ -482,11 +481,6 @@ public class Board extends Application {
             System.out.println("❌ Ruch niemożliwy! Spróbuj ponownie.");
         }
     }
-
-
-
-
-
 
     private void updateBoardPieces(ChessPiece piece, int srcRow, int srcCol, int destRow, int destCol) {
         if (piece == null) {
@@ -503,7 +497,6 @@ public class Board extends Application {
 
         System.out.println("🔄 Tablica boardPieces została zaktualizowana.");
     }
-
 
     private boolean isPathClear(ChessPiece piece, int targetRow, int targetCol) {
         int currentRow = piece.getCurrentRow();

@@ -77,10 +77,10 @@ public class ChessServer {
                     } else if (message.equals("START_GAME")) {
                         handleStartGame();
                     } else if (message.startsWith("MOVE:")) {
-                    handleMoveMessage(message, playerName); // Teraz przekazuje playerName poprawnie
-                }
+                        handleMoveMessage(message, playerName); // Teraz przekazuje playerName poprawnie
+                    }
 
-            }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -180,20 +180,12 @@ public class ChessServer {
                 // Zmiana tury
                 isWhiteTurn = !isWhiteTurn;
 
-                // Wysłanie informacji o turze tylko do gracza, który ma teraz turę
-                String nextTurnPlayer = isWhiteTurn ? whitePlayer : blackPlayer;
-                sendToPlayer(nextTurnPlayer, "TURN:" + (isWhiteTurn ? "WHITE" : "BLACK"));
-                System.out.println("🔄 Tura zmieniona na: " + (isWhiteTurn ? "WHITE" : "BLACK"));
+                // Wysłanie informacji o turze
+                String nextTurn = isWhiteTurn ? "WHITE" : "BLACK";
+                broadcast("TURN:" + nextTurn); // Rozgłoszenie zmiany tury
+                System.out.println("🔄 Tura zmieniona na: " + nextTurn);
             }
         }
-
-
-
-
-
-
-
-
 
 
 

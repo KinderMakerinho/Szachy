@@ -86,21 +86,18 @@ public class Main extends Application {
         });
     }
 
+
     private void handleTurnMessage(String message) {
         String turn = message.substring("TURN:".length()).trim();
         boolean isMyTurn = turn.equals(chessClient.getPlayerColor());
 
         if (board != null) {
-            board.setTurn(isMyTurn);
+            board.setTurn(isMyTurn); // Przekazuje stan tury do planszy
         }
 
         System.out.println("🔄 Otrzymano wiadomość od serwera: TURN " + turn);
         System.out.println("🔄 Zmieniono turę. Czy to moja tura? " + isMyTurn);
     }
-
-
-
-
 
 
 
@@ -161,7 +158,6 @@ public class Main extends Application {
         }
 
         try {
-            // Rozdziel komunikat na części
             String[] parts = message.split(":");
             if (parts.length != 3) {
                 System.err.println("❌ Nieprawidłowy format wiadomości ruchu: " + message);
@@ -169,27 +165,22 @@ public class Main extends Application {
             }
 
             String color = parts[1]; // "WHITE" lub "BLACK"
-            String moveDetails = parts[2]; // "2,3->3,3"
+            String moveDetails = parts[2]; // np. "6,4->4,4"
 
-            // Jeśli ruch dotyczy przeciwnika, wykonaj go lokalnie
-            if (!color.equals(chessClient.getPlayerColor())) {
-                System.out.println("Wykonuję ruch przeciwnika: " + moveDetails);
-                board.executeMove(message); // Przetwarzanie lokalne
-            } else {
+            // Ignoruj własne ruchy
+            if (color.equals(chessClient.getPlayerColor())) {
                 System.out.println("Zignorowano własny ruch: " + moveDetails);
+                return;
             }
 
+            // Przetwarzanie ruchu przeciwnika lokalnie
+            System.out.println("Wykonuję ruch przeciwnika: " + moveDetails);
+            board.executeMove(message);
         } catch (Exception e) {
             System.err.println("❌ Błąd przetwarzania ruchu: " + message);
             e.printStackTrace();
         }
     }
-
-
-
-
-
-
 
 
 
