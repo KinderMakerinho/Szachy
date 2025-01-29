@@ -147,22 +147,24 @@ public class ChessServer {
                     String startMessage = "START_GAME:BIAŁY=" + whitePlayer + ",CZARNY=" + blackPlayer;
                     System.out.println("Rozpoczynam grę: " + startMessage);
                     broadcast(startMessage);
+
+                    // **Nowa linia** - poinformowanie klientów, że zaczyna biały
+                    broadcast("TURN:WHITE");
                 } else {
                     out.println("Nie można rozpocząć gry – obaj gracze muszą wybrać kolory.");
                 }
             }
         }
+
         private void handleMoveMessage(String message, String playerName) {
             synchronized (clients) {
                 String movePart = message.substring("MOVE:".length()).trim();
-
                 boolean isMoveByWhite = playerName.equals(whitePlayer);
                 boolean isMoveByBlack = playerName.equals(blackPlayer);
 
                 System.out.println("🔍 Otrzymano ruch od: " + playerName);
                 System.out.println("🎯 Obecna tura: " + (isWhiteTurn ? "WHITE" : "BLACK"));
 
-                // Sprawdzamy, czy gracz ma turę
                 if (isWhiteTurn && !isMoveByWhite) {
                     sendToPlayer(playerName, "ERROR:Nie jest Twoja tura.");
                     return;
@@ -172,20 +174,22 @@ public class ChessServer {
                     return;
                 }
 
-                // Rozgłoszenie ruchu do obu klientów
+                // **Najpierw rozsyłamy ruch**
                 String color = isWhiteTurn ? "WHITE" : "BLACK";
                 broadcast("MOVE:" + color + ":" + movePart);
                 System.out.println("✅ Ruch zaakceptowany: " + playerName + " wykonał ruch: " + movePart);
 
-                // Zmiana tury
+                // **Dopiero teraz zmieniamy turę**
                 isWhiteTurn = !isWhiteTurn;
 
-                // Wysłanie informacji o turze
+                // Wysłanie informacji o nowej turze
                 String nextTurn = isWhiteTurn ? "WHITE" : "BLACK";
-                broadcast("TURN:" + nextTurn); // Rozgłoszenie zmiany tury
+                broadcast("TURN:" + nextTurn);
                 System.out.println("🔄 Tura zmieniona na: " + nextTurn);
             }
         }
+
+
 
 
 

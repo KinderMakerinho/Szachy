@@ -85,19 +85,21 @@ public class Main extends Application {
             }
         });
     }
-
-
     private void handleTurnMessage(String message) {
         String turn = message.substring("TURN:".length()).trim();
         boolean isMyTurn = turn.equals(chessClient.getPlayerColor());
 
-        if (board != null) {
-            board.setTurn(isMyTurn); // Przekazuje stan tury do planszy
-        }
+        System.out.println("🎯 Mój kolor: " + chessClient.getPlayerColor());
+        System.out.println("🎯 Wiadomość od serwera TURN: " + turn);
+        System.out.println("🎯 Czy to moja tura? " + isMyTurn);
 
-        System.out.println("🔄 Otrzymano wiadomość od serwera: TURN " + turn);
-        System.out.println("🔄 Zmieniono turę. Czy to moja tura? " + isMyTurn);
+        if (board != null) {
+            board.setTurn(isMyTurn); // Aktualizacja tury na planszy
+        }
     }
+
+
+
 
 
 

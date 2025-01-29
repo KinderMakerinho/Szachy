@@ -50,10 +50,13 @@ public class Board extends Application {
         this.chessClient = chessClient;
         this.playerColor = playerColor;
 
+        System.out.println("🟢 Ustawiono kolor gracza w Board: " + playerColor);
+
         if (playerColor == null) {
-            System.err.println("Kolor gracza nie został ustawiony! Gra może działać niepoprawnie.");
+            System.err.println("❌ Kolor gracza nie został ustawiony! Gra może działać niepoprawnie.");
         }
     }
+
 
     private static GRACZE gracz1;
     private static GRACZE gracz2;
@@ -187,10 +190,13 @@ public class Board extends Application {
         }
     }
     public void setTurn(boolean isMyTurn) {
-        this.isWhiteTurn = isMyTurn;
+        this.isWhiteTurn = playerColor.equals("WHITE") == isMyTurn;
         System.out.println("🔄 Zmieniono turę. Czy to moja tura? " + isMyTurn);
         turnIndicatorLabel.setText("Tura: " + (isMyTurn ? "Twoja" : "Przeciwnika"));
     }
+
+
+
 
 
 
@@ -311,12 +317,18 @@ public class Board extends Application {
         alert.showAndWait();
     }
     private void notifyServerAboutMove(int srcRow, int srcCol, int destRow, int destCol) {
-        if (chessClient != null && !isProcessingServerMove) { // Upewniamy się, że ruch nie pochodzi od serwera
+        if (chessClient != null && !isProcessingServerMove) {
+            if ((isWhiteTurn && !playerColor.equals("WHITE")) || (!isWhiteTurn && !playerColor.equals("BLACK"))) {
+                System.out.println("❌ To nie Twoja tura! Ruch odrzucony.");
+                return;  // Blokujemy wysłanie ruchu, jeśli to nie tura gracza
+            }
+
             String move = srcRow + "," + srcCol + "->" + destRow + "," + destCol;
             chessClient.sendToServer("MOVE:" + move);
             System.out.println("📤 Powiadomiono serwer o ruchu: " + move);
         }
     }
+
 
     public void executeMove(String moveMessage) {
         try {
